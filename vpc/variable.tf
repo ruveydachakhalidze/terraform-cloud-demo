@@ -1,0 +1,5 @@
+veriable region {
+    type = string
+
+
+}
