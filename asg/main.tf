@@ -24,11 +24,45 @@ module "asg" {
 }
 
 
+resource "aws_security_group" "lb-firewall" {
+  name        = "lb-firewall"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
 
 resource "aws_elb" "bar" {
   name = "foobar-terraform-elbs"
-  availability_zones = data.terraform_remote_state.vpc.outputs.azs
-  security_groups = [aws_security_group.asg-sec-group.id]
+  subnets = 
+  data.terraform_remote_state.vpc.outputs.public_subnets
+ security_groups = [
+    aws_security_group.lb-firewall.id
+ ]
+}
 
 
 listener {
@@ -55,3 +89,11 @@ connection_draining_timeout = 400
 
 
 }
+
+
+resource "aws_route53_record" "blog" {
+zone_id = "Z320HGRMBVZ9LR'
+name = "blog"
+type = "(NAME"
+ttl = 5
+records = laws_elb. bar. dns_name]
