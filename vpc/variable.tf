@@ -1,4 +1,4 @@
-veriable region {
+variable region {
     type = string
 
 
